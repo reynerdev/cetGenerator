@@ -143,6 +143,8 @@ const getDataWorksheet = (sheet) => {
   const reee = 'test';
 
   const sensors = [];
+
+  // were going to loop with the non empty sensor columns. After, with that columns we will find the details of the sensor
   row.eachCell({ includeEmpty: false }, (cell, colNumber) => {
     console.log(
       'the value of the cell is',
@@ -152,7 +154,10 @@ const getDataWorksheet = (sheet) => {
       cell.col
     );
 
+    // we create an object that will handle our data recollected from the file
     let sd = new sensorData();
+
+    // check wether there is a sensor installad on the device
 
     if (!!cell.result) {
       console.log('not empty cell', cell.col);
@@ -170,6 +175,8 @@ const getDataWorksheet = (sheet) => {
           // console.log('celda name', sd[celda].name);
           console.log(!!sd[key].name);
           console.log('key', key);
+
+          // set the value of the sd object with the values of the excel file
           sd.setValue(sheet.getCell(celda).result, 'A' + sd[key].row);
           // if (!!!cell.name) {
           //   sd.setValue(cell.value, celda);
@@ -180,27 +187,11 @@ const getDataWorksheet = (sheet) => {
 
     console.log('SensorFinal', sd);
     sensors.push(sd);
-    // if (colNumber >= 2 && colNumber <= 6) {
-    //   if (!cell.value.result) {
-    //     numberSensorInstalled = colNumber - 2;
-    //   } else {
-    //     listOfColumns.push(colNumber);
-    //   }
-    // }
-    // console.log('Cell ' + colNumber + ' = ' + cell.value, 'cellll', cell);
   });
 
   console.log('sensors', sensors);
-  console.log('numberSensor', numberSensorInstalled);
 
-  console.log('listOfCOlumns', listOfColumns);
-  // 1.1 Iterate along the row of typeOfGas and find the last, create and array of to iterate later
-
-  // 2. Iterate based in the last array
-
-  const a = 'hola';
-
-  // we are going to return an object with al the information of the sheet
+  return sensors;
 
   const sensorTemplate = {
     sensorType: '',

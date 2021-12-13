@@ -6,57 +6,51 @@ import { Workbook } from 'exceljs';
 import { getDataWorksheet } from './utils';
 
 const getContentFromFile = (files) => {
-  console.log('files', files);
-
   if (files.length === 0) {
     console.log('inside');
     return;
   }
 
   const wb = new Workbook();
+
   // remember a file inherhits from Blob and FileReader is an object with the sole pourpse of reading data from Blob (and hence a file to)
 
   const reader = new FileReader();
 
-  reader.readAsArrayBuffer(files[0]);
+  const contentFiles = [];
 
-  // let link = document.createElement('a')
+  files.forEach((file, index) => {
+    reader.readAsArrayBuffer(file);
 
-  // link.href = URL.createObjectURL(files[0])
+    reader.onload = async () => {
+      // read de result after read the file as a Buffer
+      const buffer = reader.result;
 
-  // link.click();
+      try {
+        let fileXlsAsBuffer = XLSX.read(buffer);
 
-  // URL.revokeObjectURL(link.href)
+        // convert xls to xlsx
+        let parsedBuffer = XLSX.write(fileXlsAsBuffer, {
+          bookType: 'xlsx',
+          type: 'array',
+        });
 
-  reader.onload = async () => {
-    // read de result after read the file as a Buffer
-    const buffer = reader.result;
+        const readWb = await wb.xlsx.load(parsedBuffer);
 
-    try {
-      let fileXlsAsBuffer = XLSX.read(buffer);
+        const certCustomerSheet = readWb.getWorksheet(
+          'CalCertificate Customer'
+        );
 
-      // convert xls to xlsx
-      let parsedBuffer = XLSX.write(fileXlsAsBuffer, {
-        bookType: 'xlsx',
-        type: 'array',
-      });
+        const sensors = getDataWorksheet(certCustomerSheet);
 
-      const readWb = await wb.xlsx.load(parsedBuffer);
+        contentFiles.push(sensors);
+      } catch (error) {
+        console.log('error', error);
+      }
+    };
+  });
 
-      const certCustomerSheet = readWb.getWorksheet('CalCertificate Customer');
-
-      console.log('certCustomerSheet', certCustomerSheet);
-
-      getDataWorksheet(certCustomerSheet);
-
-      // readWb.eachSheet((worksheet, sheetId) => {
-      //   console.log('reading excel')
-      //   console.log("workshett", worksheet)
-      // })
-    } catch (error) {
-      console.log('error', error);
-    }
-  };
+  return contentFiles;
 };
 
 const DevicesTabs = ({ files }) => {
